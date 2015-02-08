@@ -11,9 +11,14 @@ Play Framework application. It uses the
 [play-slick](https://github.com/playframework/play-slick) library for database
 access.
 
+**Warning:** This template is for version 2.0-SNAPSHOT of Silhouette currently under development. Were you looking for version [1.0](https://github.com/mohiva/play-silhouette-seed/tree/1.0) of the template?
+
 ## Example
 
 Currently, there is no live example of this template.
+[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
+
+(The "Build App" phase will take a few minutes)
 
 ## Features
 
@@ -59,5 +64,4 @@ This project template is also
 
 # License
 
-The code is licensed under
-[Apache License v2.0](http://www.apache.org/licenses/LICENSE-2.0).
+The code is licensed under [Apache License v2.0](http://www.apache.org/licenses/LICENSE-2.0).

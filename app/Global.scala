@@ -1,17 +1,25 @@
-import play.api.i18n.{Messages, Lang}
-import play.api.mvc.Results._
-import play.api.GlobalSettings
-import play.api.mvc.{Result, RequestHeader}
-import com.mohiva.play.silhouette.core.{Logger, SecuredSettings}
-import utils.di.SilhouetteModule
-import scala.concurrent.Future
+package app
+
 import com.google.inject.{Guice, Injector}
+import com.mohiva.play.silhouette.api.{Logger, SecuredSettings}
 import controllers.routes
+import play.api.GlobalSettings
+import play.api.i18n.{Lang, Messages}
+import play.api.mvc.Results._
+import play.api.mvc.{RequestHeader, Result}
+import utils.di.SilhouetteModule
+
+import scala.concurrent.Future
+
+/**
+ * The global object.
+ */
+object Global extends Global
 
 /**
  * The global configuration.
  */
-object Global extends GlobalSettings with SecuredSettings with Logger {
+trait Global extends GlobalSettings with SecuredSettings with Logger {
 
   /**
    * The Guice dependencies injector.

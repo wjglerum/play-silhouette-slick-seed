@@ -95,6 +95,30 @@ object DBTableDefinitions {
     def loginInfoId = column[Long]("logininfoid")
     def * = (id.?, accessToken, tokenType, expiresIn, refreshToken, loginInfoId) <> (DBOAuth2Info.tupled, DBOAuth2Info.unapply)
   }
+  
+  case class DBOpenIDInfo (
+    id: String,
+    loginInfoId: Long
+  )
+  
+  class OpenIDInfos(tag: Tag) extends Table[DBOpenIDInfo](tag, "openidinfo") {
+    def id = column[String]("id")
+    def loginInfoId = column[Long]("logininfoid")
+    def * = (id, loginInfoId) <> (DBOpenIDInfo.tupled, DBOpenIDInfo.unapply)
+  }
+  
+  case class DBOpenIDAttribute (
+    id: String,
+    key: String,
+    value: String
+  )
+  
+  class OpenIDAttributes(tag: Tag) extends Table[DBOpenIDAttribute](tag, "openidattributes") {
+    def id = column[String]("id")
+    def key = column[String]("key")
+    def value = column[String]("value")
+    def * = (id, key, value) <> (DBOpenIDAttribute.tupled, DBOpenIDAttribute.unapply)
+  }
 
   val slickUsers = TableQuery[Users]
   val slickLoginInfos = TableQuery[LoginInfos]
@@ -102,5 +126,6 @@ object DBTableDefinitions {
   val slickPasswordInfos = TableQuery[PasswordInfos]
   val slickOAuth1Infos = TableQuery[OAuth1Infos]
   val slickOAuth2Infos = TableQuery[OAuth2Infos]
-
+  val slickOpenIDInfos = TableQuery[OpenIDInfos]
+  val slickOpenIDAttributes = TableQuery[OpenIDAttributes]
 }

@@ -11,8 +11,6 @@ Play Framework application. It uses the
 [play-slick](https://github.com/playframework/play-slick) library for database
 access.
 
-**Warning:** This template is for version 2.0-SNAPSHOT of Silhouette currently under development. Were you looking for version [1.0](https://github.com/mohiva/play-silhouette-seed/tree/1.0) of the template?
-
 ## Example
 
 Currently, there is no live example of this template.
@@ -24,7 +22,8 @@ Currently, there is no live example of this template.
 
 * Sign Up
 * Sign In (Credentials)
-* Social Auth (Facebook, Google+, Twitter)
+* Social Auth (Facebook, Google+, VK, Twitter, Xing, Yahoo)
+* Two-factor authentication with Clef
 * Dependency Injection with Guice
 * Publishing Events
 * Avatar service
@@ -32,6 +31,7 @@ Currently, there is no live example of this template.
 
 ## Documentation
 
+Consulate the [Silhouette documentation](http://silhouette.mohiva.com/docs) for more information. If you need help with the integration of Silhouette into your project, don't hesitate and ask questions in our [mailing list](https://groups.google.com/forum/#!forum/play-silhouette) or on [Stack Overflow](http://stackoverflow.com/questions/tagged/playframework).
 ### Slick
 
 This template defaults to an in memory data storage via hash maps. To enable

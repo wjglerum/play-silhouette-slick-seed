@@ -1,28 +1,34 @@
-import play.PlayScala
-
-scalaVersion := "2.11.4"
+import scalariform.formatter.preferences._
 
 name := "play-silhouette-seed"
 
-version := "2.0-SNAPSHOT"
+version := "3.0.0-RC1"
+
+scalaVersion := "2.11.6"
 
 resolvers := ("Atlassian Releases" at "https://maven.atlassian.com/public/") +: resolvers.value
+
+resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
 libraryDependencies ++= Seq(
-  "com.mohiva" %% "play-silhouette" % "2.0-SNAPSHOT",
-  "org.webjars" %% "webjars-play" % "2.3.0",
+  "com.mohiva" %% "play-silhouette" % "3.0.0-RC1",
+  "org.webjars" %% "webjars-play" % "2.4.0",
   "org.webjars" % "bootstrap" % "3.1.1",
   "org.webjars" % "jquery" % "1.11.0",
-  "net.codingwell" %% "scala-guice" % "4.0.0-beta4",
+  "net.codingwell" %% "scala-guice" % "4.0.0",
+  "com.mohiva" %% "play-silhouette-testkit" % "3.0.0-RC1" % "test",
+  specs2 % Test,
   "com.typesafe.play" %% "play-slick" % "0.8.0",
   "mysql" % "mysql-connector-java" % "5.1.32",
-  "com.mohiva" %% "play-silhouette-testkit" % "2.0-SNAPSHOT" % "test",
-  cache
+  cache,
+  filters
 )
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
+
+routesGenerator := InjectedRoutesGenerator
 
 scalacOptions ++= Seq(
   "-deprecation", // Emit warning and location for usages of deprecated APIs.
@@ -36,3 +42,14 @@ scalacOptions ++= Seq(
   "-Ywarn-nullary-override", // Warn when non-nullary overrides nullary, e.g. def foo() over def foo.
   "-Ywarn-numeric-widen" // Warn when numerics are widened.
 )
+
+//********************************************************
+// Scalariform settings
+//********************************************************
+
+defaultScalariformSettings
+
+ScalariformKeys.preferences := ScalariformKeys.preferences.value
+  .setPreference(FormatXml, false)
+  .setPreference(DoubleIndentClassDeclaration, false)
+  .setPreference(PreserveDanglingCloseParenthesis, true)

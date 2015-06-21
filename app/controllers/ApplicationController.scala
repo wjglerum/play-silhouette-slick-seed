@@ -2,19 +2,26 @@ package controllers
 
 import javax.inject.Inject
 
-import com.mohiva.play.silhouette.api.{Environment, LogoutEvent, Silhouette}
+import com.mohiva.play.silhouette.api.{ Environment, LogoutEvent, Silhouette }
 import com.mohiva.play.silhouette.impl.authenticators.SessionAuthenticator
+import com.mohiva.play.silhouette.impl.providers.SocialProviderRegistry
 import forms._
 import models.User
+import play.api.i18n.MessagesApi
 
 import scala.concurrent.Future
 
 /**
  * The basic application controller.
  *
+ * @param messagesApi The Play messages API.
  * @param env The Silhouette environment.
+ * @param socialProviderRegistry The social provider registry.
  */
-class ApplicationController @Inject() (implicit val env: Environment[User, SessionAuthenticator])
+class ApplicationController @Inject() (
+  val messagesApi: MessagesApi,
+  val env: Environment[User, SessionAuthenticator],
+  socialProviderRegistry: SocialProviderRegistry)
   extends Silhouette[User, SessionAuthenticator] {
 
   /**
@@ -33,8 +40,8 @@ class ApplicationController @Inject() (implicit val env: Environment[User, Sessi
    */
   def signIn = UserAwareAction.async { implicit request =>
     request.identity match {
-      case Some(user) => Future.successful(Redirect(routes.ApplicationController.index))
-      case None => Future.successful(Ok(views.html.signIn(SignInForm.form)))
+      case Some(user) => Future.successful(Redirect(routes.ApplicationController.index()))
+      case None => Future.successful(Ok(views.html.signIn(SignInForm.form, socialProviderRegistry)))
     }
   }
 
@@ -45,7 +52,7 @@ class ApplicationController @Inject() (implicit val env: Environment[User, Sessi
    */
   def signUp = UserAwareAction.async { implicit request =>
     request.identity match {
-      case Some(user) => Future.successful(Redirect(routes.ApplicationController.index))
+      case Some(user) => Future.successful(Redirect(routes.ApplicationController.index()))
       case None => Future.successful(Ok(views.html.signUp(SignUpForm.form)))
     }
   }
@@ -56,9 +63,9 @@ class ApplicationController @Inject() (implicit val env: Environment[User, Sessi
    * @return The result to display.
    */
   def signOut = SecuredAction.async { implicit request =>
-    val result = Future.successful(Redirect(routes.ApplicationController.index))
-    env.eventBus.publish(LogoutEvent(request.identity, request, request2lang))
+    val result = Redirect(routes.ApplicationController.index())
+    env.eventBus.publish(LogoutEvent(request.identity, request, request2Messages))
 
-    request.authenticator.discard(result)
+    env.authenticatorService.discard(request.authenticator, result)
   }
 }

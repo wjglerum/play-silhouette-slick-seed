@@ -20,8 +20,8 @@ libraryDependencies ++= Seq(
   "net.codingwell" %% "scala-guice" % "4.0.0",
   "com.mohiva" %% "play-silhouette-testkit" % "3.0.0-RC1" % "test",
   specs2 % Test,
-  "com.typesafe.play" %% "play-slick" % "0.8.0",
-  "mysql" % "mysql-connector-java" % "5.1.32",
+  "com.typesafe.play" %% "play-slick" % "1.0.0",
+  "com.h2database" % "h2" % "1.4.187",
   cache,
   filters
 )

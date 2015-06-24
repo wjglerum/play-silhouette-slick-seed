@@ -1,8 +1,13 @@
 package models.daos.slick
 
-import play.api.db.slick.Config.driver.simple._
+import com.mohiva.play.silhouette.api.LoginInfo
+import scala.concurrent.ExecutionContext.Implicits.global
+import slick.driver.JdbcProfile
 
-object DBTableDefinitions {
+trait DBTableDefinitions {
+  
+  protected val driver: JdbcProfile
+  import driver.api._
 
   case class DBUser (
     userID: String,
@@ -42,8 +47,8 @@ object DBTableDefinitions {
   )
 
   class UserLoginInfos(tag: Tag) extends Table[DBUserLoginInfo](tag, "userlogininfo") {
-    def userID = column[String]("userID", O.NotNull)
-    def loginInfoId = column[Long]("loginInfoId", O.NotNull)
+    def userID = column[String]("userID")
+    def loginInfoId = column[Long]("loginInfoId")
     def * = (userID, loginInfoId) <> (DBUserLoginInfo.tupled, DBUserLoginInfo.unapply)
   }
 
@@ -102,7 +107,7 @@ object DBTableDefinitions {
   )
   
   class OpenIDInfos(tag: Tag) extends Table[DBOpenIDInfo](tag, "openidinfo") {
-    def id = column[String]("id")
+    def id = column[String]("id", O.PrimaryKey)
     def loginInfoId = column[Long]("logininfoid")
     def * = (id, loginInfoId) <> (DBOpenIDInfo.tupled, DBOpenIDInfo.unapply)
   }
@@ -120,6 +125,7 @@ object DBTableDefinitions {
     def * = (id, key, value) <> (DBOpenIDAttribute.tupled, DBOpenIDAttribute.unapply)
   }
 
+  // table query definitions
   val slickUsers = TableQuery[Users]
   val slickLoginInfos = TableQuery[LoginInfos]
   val slickUserLoginInfos = TableQuery[UserLoginInfos]
@@ -128,4 +134,8 @@ object DBTableDefinitions {
   val slickOAuth2Infos = TableQuery[OAuth2Infos]
   val slickOpenIDInfos = TableQuery[OpenIDInfos]
   val slickOpenIDAttributes = TableQuery[OpenIDAttributes]
+  
+  // queries used in multiple places
+  def loginInfoQuery(loginInfo: LoginInfo) = 
+    slickLoginInfos.filter(dbLoginInfo => dbLoginInfo.providerID === loginInfo.providerID && dbLoginInfo.providerKey === loginInfo.providerKey)
 }

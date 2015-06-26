@@ -28,18 +28,20 @@ import play.api.Play.current
 import play.api.Logger
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.openid.OpenIdClient
+import play.api.{Environment => PlayEnvironment, Configuration}
 
 /**
  * The Guice module which wires all Silhouette dependencies.
  */
-class SilhouetteModule extends AbstractModule with ScalaModule {
+class SilhouetteModule(environment: PlayEnvironment, configuration: Configuration)
+    extends AbstractModule with ScalaModule {
 
   /**
    * Configures the module.
    */
   def configure() {
     bind[UserService].to[UserServiceImpl]
-    val useSlick = Play.configuration.getBoolean("silhouette.seed.db.useSlick").getOrElse(false)
+    val useSlick = configuration.getBoolean("silhouette.seed.db.useSlick").getOrElse(false)
     if (useSlick) {
       Logger.debug("Binding to Slick DAO implementations.")
       bind[UserDAO].to[UserDAOSlick]

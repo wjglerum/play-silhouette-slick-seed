@@ -21,8 +21,10 @@ libraryDependencies ++= Seq(
   "com.mohiva" %% "play-silhouette-testkit" % "3.0.0-RC1" % "test",
   specs2 % Test,
   "com.typesafe.play" %% "play-slick" % "1.0.0",
+  "com.typesafe.play" %% "play-slick-evolutions" % "1.0.0",
   "com.h2database" % "h2" % "1.4.187",
   cache,
+  evolutions,
   filters
 )
 

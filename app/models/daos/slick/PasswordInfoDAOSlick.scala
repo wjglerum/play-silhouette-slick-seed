@@ -17,6 +17,11 @@ class PasswordInfoDAOSlick extends DelegableAuthInfoDAO[PasswordInfo] with DAOSl
     dbLoginInfo <- loginInfoQuery(loginInfo)
     dbPasswordInfo <- slickPasswordInfos if dbPasswordInfo.loginInfoId === dbLoginInfo.id
   } yield dbPasswordInfo
+  
+  // Use subquery workaround instead of join to get authinfo because slick only supports selecting
+  // from a single table for update/delete queries (https://github.com/slick/slick/issues/684).
+  protected def passwordInfoSubQuery(loginInfo: LoginInfo) =
+    slickPasswordInfos.filter(_.loginInfoId in loginInfoQuery(loginInfo).map(_.id))
 
   protected def addAction(loginInfo: LoginInfo, authInfo: PasswordInfo) =
     loginInfoQuery(loginInfo).result.head.flatMap { dbLoginInfo =>
@@ -25,10 +30,9 @@ class PasswordInfoDAOSlick extends DelegableAuthInfoDAO[PasswordInfo] with DAOSl
     }.transactionally
     
   protected def updateAction(loginInfo: LoginInfo, authInfo: PasswordInfo) =
-    loginInfoQuery(loginInfo).result.head.flatMap { dbLoginInfo =>
-      slickPasswordInfos update
-        DBPasswordInfo(authInfo.hasher, authInfo.password, authInfo.salt, dbLoginInfo.id.get)
-    }.transactionally
+    passwordInfoSubQuery(loginInfo).
+      map(dbPasswordInfo => (dbPasswordInfo.hasher, dbPasswordInfo.password, dbPasswordInfo.salt)).
+      update((authInfo.hasher, authInfo.password, authInfo.salt))
   
   /**
    * Finds the auth info which is linked with the specified login info.
@@ -37,11 +41,7 @@ class PasswordInfoDAOSlick extends DelegableAuthInfoDAO[PasswordInfo] with DAOSl
    * @return The retrieved auth info or None if no auth info could be retrieved for the given login info.
    */
   def find(loginInfo: LoginInfo): Future[Option[PasswordInfo]] = {
-    val query = for {
-      dbLoginInfo <- loginInfoQuery(loginInfo)
-      dbPasswordInfo <- slickPasswordInfos if dbPasswordInfo.loginInfoId === dbLoginInfo.id
-    } yield dbPasswordInfo
-    db.run(query.result.headOption).map { dbPasswordInfoOption =>
+    db.run(passwordInfoQuery(loginInfo).result.headOption).map { dbPasswordInfoOption =>
       dbPasswordInfoOption.map(dbPasswordInfo => 
         PasswordInfo(dbPasswordInfo.hasher, dbPasswordInfo.password, dbPasswordInfo.salt))
     }
@@ -93,5 +93,5 @@ class PasswordInfoDAOSlick extends DelegableAuthInfoDAO[PasswordInfo] with DAOSl
    * @return A future to wait for the process to be completed.
    */
   def remove(loginInfo: LoginInfo): Future[Unit] =
-    db.run(passwordInfoQuery(loginInfo).delete).map(_ => ())
+    db.run(passwordInfoSubQuery(loginInfo).delete).map(_ => ())
 }

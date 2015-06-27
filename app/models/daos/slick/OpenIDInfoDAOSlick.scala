@@ -90,7 +90,7 @@ class OpenIDInfoDAOSlick extends DelegableAuthInfoDAO[OpenIDInfo] with DAOSlick 
     val query = loginInfoQuery(loginInfo).joinLeft(slickOpenIDInfos).on(_.id === _.loginInfoId)
     val action = query.result.head.flatMap {
       case (dbLoginInfo, Some(dbOpenIDInfo)) => updateAction(loginInfo, authInfo)
-      case (dbLoginInfo, None) => addAction(loginInfo, authInfo)
+      case (dbLoginInfo, None)               => addAction(loginInfo, authInfo)
     }
     db.run(action).map(_ => authInfo)
   }
@@ -102,10 +102,14 @@ class OpenIDInfoDAOSlick extends DelegableAuthInfoDAO[OpenIDInfo] with DAOSlick 
    * @return A future to wait for the process to be completed.
    */
   def remove(loginInfo: LoginInfo): Future[Unit] = {
-    val attributeQuery = for {
-      dbOpenIDInfo <- openIDInfoQuery(loginInfo)
-      dbOpenIDAttributes <- slickOpenIDAttributes.filter(_.id === dbOpenIDInfo.id)
-    } yield dbOpenIDAttributes
-    db.run((openIDInfoQuery(loginInfo).delete andThen attributeQuery.delete).transactionally).map(_ => ())
+    // val attributeQuery = for {
+    //  dbOpenIDInfo <- openIDInfoQuery(loginInfo)
+    //  dbOpenIDAttributes <- slickOpenIDAttributes.filter(_.id === dbOpenIDInfo.id)
+    //} yield dbOpenIDAttributes
+    // Use subquery workaround instead of join because slick only supports selecting
+    // from a single table for update/delete queries (https://github.com/slick/slick/issues/684).
+    val openIDInfoSubQuery = slickOpenIDInfos.filter(_.loginInfoId in loginInfoQuery(loginInfo).map(_.id))
+    val attributeSubQuery = slickOpenIDAttributes.filter(_.id in openIDInfoSubQuery.map(_.id))
+    db.run((openIDInfoSubQuery.delete andThen attributeSubQuery.delete).transactionally).map(_ => ())
   }
 }

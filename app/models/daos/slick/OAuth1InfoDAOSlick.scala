@@ -17,6 +17,11 @@ class OAuth1InfoDAOSlick extends DelegableAuthInfoDAO[OAuth1Info] with DAOSlick 
     dbLoginInfo <- loginInfoQuery(loginInfo)
     dbOAuth1Info <- slickOAuth1Infos if dbOAuth1Info.loginInfoId === dbLoginInfo.id
   } yield dbOAuth1Info
+  
+  // Use subquery workaround instead of join to get authinfo because slick only supports selecting
+  // from a single table for update/delete queries (https://github.com/slick/slick/issues/684).
+  protected def oAuth1InfoSubQuery(loginInfo: LoginInfo) =
+    slickOAuth1Infos.filter(_.loginInfoId in loginInfoQuery(loginInfo).map(_.id))
 
   protected def addAction(loginInfo: LoginInfo, authInfo: OAuth1Info) =
     loginInfoQuery(loginInfo).result.head.flatMap { dbLoginInfo =>
@@ -24,7 +29,7 @@ class OAuth1InfoDAOSlick extends DelegableAuthInfoDAO[OAuth1Info] with DAOSlick 
     }.transactionally
 
   protected def updateAction(loginInfo: LoginInfo, authInfo: OAuth1Info) =
-    oAuth1InfoQuery(loginInfo).
+    oAuth1InfoSubQuery(loginInfo).
       map(dbOAuthInfo => (dbOAuthInfo.token, dbOAuthInfo.secret)).
       update((authInfo.token, authInfo.secret))
 
@@ -87,5 +92,5 @@ class OAuth1InfoDAOSlick extends DelegableAuthInfoDAO[OAuth1Info] with DAOSlick 
    * @return A future to wait for the process to be completed.
    */
   def remove(loginInfo: LoginInfo): Future[Unit] =
-    db.run(oAuth1InfoQuery(loginInfo).delete).map(_ => ())
+    db.run(oAuth1InfoSubQuery(loginInfo).delete).map(_ => ())
 }

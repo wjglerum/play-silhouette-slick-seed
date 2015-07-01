@@ -23,6 +23,7 @@ Currently, there is no live example of this template.
 * Dependency Injection with Guice
 * Publishing Events
 * Avatar service
+* Remember me functionality
 * play-slick database access
 
 ## Documentation

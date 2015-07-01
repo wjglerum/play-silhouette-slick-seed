@@ -1,8 +1,8 @@
-package models.daos.slick
+package models.daos
 
 import com.mohiva.play.silhouette.api.LoginInfo
-import scala.concurrent.ExecutionContext.Implicits.global
 import slick.driver.JdbcProfile
+import slick.lifted.ProvenShape.proveShapeOf
 
 trait DBTableDefinitions {
   

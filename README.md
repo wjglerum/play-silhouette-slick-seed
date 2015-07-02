@@ -39,7 +39,7 @@ In order to use another database supported by Slick, you need to change the driv
 ## Activator
 
 This project template is also
-[hosted at typesafe](https://typesafe.com/activator/template/play-silhouette-seed-slick).
+[hosted at typesafe](https://typesafe.com/activator/template/play-silhouette-slick-seed).
 
 # License
 

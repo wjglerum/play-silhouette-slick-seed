@@ -1,6 +1,6 @@
 import scalariform.formatter.preferences._
 
-name := "play-silhouette-seed"
+name := "play-silhouette-slick-seed"
 
 version := "3.0.0"
 

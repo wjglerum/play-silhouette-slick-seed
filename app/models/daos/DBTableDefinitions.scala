@@ -14,8 +14,7 @@ trait DBTableDefinitions {
     firstName: Option[String],
     lastName: Option[String],
     fullName: Option[String],
-    email: Option[String],
-    avatarURL: Option[String]
+    email: Option[String]
   )
 
   class Users(tag: Tag) extends Table[DBUser](tag, "user") {
@@ -24,8 +23,7 @@ trait DBTableDefinitions {
     def lastName = column[Option[String]]("lastName")
     def fullName = column[Option[String]]("fullName")
     def email = column[Option[String]]("email")
-    def avatarURL = column[Option[String]]("avatarURL")
-    def * = (id, firstName, lastName, fullName, email, avatarURL) <> (DBUser.tupled, DBUser.unapply)
+    def * = (id, firstName, lastName, fullName, email) <> (DBUser.tupled, DBUser.unapply)
   }
 
   case class DBLoginInfo (
@@ -67,73 +65,12 @@ trait DBTableDefinitions {
     def * = (hasher, password, salt, loginInfoId) <> (DBPasswordInfo.tupled, DBPasswordInfo.unapply)
   }
 
-  case class DBOAuth1Info (
-    id: Option[Long],
-    token: String,
-    secret: String,
-    loginInfoId: Long
-  )
-
-  class OAuth1Infos(tag: Tag) extends Table[DBOAuth1Info](tag, "oauth1info") {
-    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
-    def token = column[String]("token")
-    def secret = column[String]("secret")
-    def loginInfoId = column[Long]("loginInfoId")
-    def * = (id.?, token, secret, loginInfoId) <> (DBOAuth1Info.tupled, DBOAuth1Info.unapply)
-  }
-
-  case class DBOAuth2Info (
-    id: Option[Long],
-    accessToken: String,
-    tokenType: Option[String],
-    expiresIn: Option[Int],
-    refreshToken: Option[String],
-    loginInfoId: Long
-  )
-
-  class OAuth2Infos(tag: Tag) extends Table[DBOAuth2Info](tag, "oauth2info") {
-    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
-    def accessToken = column[String]("accesstoken")
-    def tokenType = column[Option[String]]("tokentype")
-    def expiresIn = column[Option[Int]]("expiresin")
-    def refreshToken = column[Option[String]]("refreshtoken")
-    def loginInfoId = column[Long]("logininfoid")
-    def * = (id.?, accessToken, tokenType, expiresIn, refreshToken, loginInfoId) <> (DBOAuth2Info.tupled, DBOAuth2Info.unapply)
-  }
-  
-  case class DBOpenIDInfo (
-    id: String,
-    loginInfoId: Long
-  )
-  
-  class OpenIDInfos(tag: Tag) extends Table[DBOpenIDInfo](tag, "openidinfo") {
-    def id = column[String]("id", O.PrimaryKey)
-    def loginInfoId = column[Long]("logininfoid")
-    def * = (id, loginInfoId) <> (DBOpenIDInfo.tupled, DBOpenIDInfo.unapply)
-  }
-  
-  case class DBOpenIDAttribute (
-    id: String,
-    key: String,
-    value: String
-  )
-  
-  class OpenIDAttributes(tag: Tag) extends Table[DBOpenIDAttribute](tag, "openidattributes") {
-    def id = column[String]("id")
-    def key = column[String]("key")
-    def value = column[String]("value")
-    def * = (id, key, value) <> (DBOpenIDAttribute.tupled, DBOpenIDAttribute.unapply)
-  }
-
   // table query definitions
   val slickUsers = TableQuery[Users]
   val slickLoginInfos = TableQuery[LoginInfos]
   val slickUserLoginInfos = TableQuery[UserLoginInfos]
   val slickPasswordInfos = TableQuery[PasswordInfos]
-  val slickOAuth1Infos = TableQuery[OAuth1Infos]
-  val slickOAuth2Infos = TableQuery[OAuth2Infos]
-  val slickOpenIDInfos = TableQuery[OpenIDInfos]
-  val slickOpenIDAttributes = TableQuery[OpenIDAttributes]
+
   
   // queries used in multiple places
   def loginInfoQuery(loginInfo: LoginInfo) = 

@@ -23,6 +23,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-slick-evolutions" % "1.0.1",
   "com.h2database" % "h2" % "1.4.188",
   "net.ceedubs" %% "ficus" % "1.1.2",
+  "org.postgresql" % "postgresql" % "9.4-1201-jdbc41",
   cache,
   evolutions,
   filters

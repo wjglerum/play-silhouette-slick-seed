@@ -13,7 +13,6 @@ import com.mohiva.play.silhouette.impl.repositories.DelegableAuthInfoRepository
 import com.mohiva.play.silhouette.impl.util._
 import models.User
 import models.daos._
-import models.services.{UserService, UserServiceImpl}
 import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 import net.codingwell.scalaguice.ScalaModule
@@ -30,8 +29,6 @@ class SilhouetteModule extends AbstractModule with ScalaModule {
     * Configures the module.
     */
   def configure() {
-    bind[UserService].to[UserServiceImpl]
-    bind[UserDAO].to[UserDAOImpl]
     bind[DelegableAuthInfoDAO[PasswordInfo]].to[PasswordInfoDAO]
     bind[CacheLayer].to[PlayCacheLayer]
     bind[IDGenerator].toInstance(new SecureRandomIDGenerator())
@@ -53,18 +50,18 @@ class SilhouetteModule extends AbstractModule with ScalaModule {
   /**
     * Provides the Silhouette environment.
     *
-    * @param userService          The user service implementation.
+    * @param userDAO              The user service implementation.
     * @param authenticatorService The authentication service implementation.
     * @param eventBus             The event bus instance.
     * @return The Silhouette environment.
     */
   @Provides
-  def provideEnvironment(userService: UserService,
+  def provideEnvironment(userDAO: UserDAO,
                          authenticatorService: AuthenticatorService[SessionAuthenticator],
                          eventBus: EventBus): Environment[User, SessionAuthenticator] = {
 
     Environment[User, SessionAuthenticator](
-      userService,
+      userDAO,
       authenticatorService,
       Seq(),
       eventBus

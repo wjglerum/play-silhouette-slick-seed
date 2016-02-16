@@ -1,78 +1,41 @@
 package models.daos
 
-import com.mohiva.play.silhouette.api.LoginInfo
+import java.util.UUID
+
+import models.User
 import slick.driver.JdbcProfile
 import slick.lifted.ProvenShape.proveShapeOf
 
 trait DBTableDefinitions {
-  
   protected val driver: JdbcProfile
+
   import driver.api._
 
-  case class DBUser (
-    userID: String,
-    firstName: Option[String],
-    lastName: Option[String],
-    fullName: Option[String],
-    email: Option[String]
-  )
+  val users = TableQuery[Users]
+  val passwords = TableQuery[Passwords]
 
-  class Users(tag: Tag) extends Table[DBUser](tag, "user") {
-    def id = column[String]("userID", O.PrimaryKey)
-    def firstName = column[Option[String]]("firstName")
-    def lastName = column[Option[String]]("lastName")
-    def fullName = column[Option[String]]("fullName")
-    def email = column[Option[String]]("email")
-    def * = (id, firstName, lastName, fullName, email) <> (DBUser.tupled, DBUser.unapply)
+
+  class Users(tag: Tag) extends Table[User](tag, "users") {
+    def * = (id, name, email) <>(User.tupled, User.unapply)
+
+    def id = column[UUID]("id", O.PrimaryKey)
+
+    def name = column[String]("name")
+
+    def email = column[String]("email")
   }
 
-  case class DBLoginInfo (
-    id: Option[Long],
-    providerID: String,
-    providerKey: String
-  )
+  case class DBPasswordInfo(hash: String, password: String, salt: Option[String], email: String)
 
-  class LoginInfos(tag: Tag) extends Table[DBLoginInfo](tag, "logininfo") {
-    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
-    def providerID = column[String]("providerID")
-    def providerKey = column[String]("providerKey")
-    def * = (id.?, providerID, providerKey) <> (DBLoginInfo.tupled, DBLoginInfo.unapply)
-  }
+  class Passwords(tag: Tag) extends Table[DBPasswordInfo](tag, "passwords") {
+    def * = (hash, password, salt, email) <>(DBPasswordInfo.tupled, DBPasswordInfo.unapply)
 
-  case class DBUserLoginInfo (
-    userID: String,
-    loginInfoId: Long
-  )
+    def hash = column[String]("hash")
 
-  class UserLoginInfos(tag: Tag) extends Table[DBUserLoginInfo](tag, "userlogininfo") {
-    def userID = column[String]("userID")
-    def loginInfoId = column[Long]("loginInfoId")
-    def * = (userID, loginInfoId) <> (DBUserLoginInfo.tupled, DBUserLoginInfo.unapply)
-  }
-
-  case class DBPasswordInfo (
-    hasher: String,
-    password: String,
-    salt: Option[String],
-    loginInfoId: Long
-  )
-
-  class PasswordInfos(tag: Tag) extends Table[DBPasswordInfo](tag, "passwordinfo") {
-    def hasher = column[String]("hasher")
     def password = column[String]("password")
+
     def salt = column[Option[String]]("salt")
-    def loginInfoId = column[Long]("loginInfoId")
-    def * = (hasher, password, salt, loginInfoId) <> (DBPasswordInfo.tupled, DBPasswordInfo.unapply)
+
+    def email = column[String]("email", O.PrimaryKey)
   }
-
-  // table query definitions
-  val slickUsers = TableQuery[Users]
-  val slickLoginInfos = TableQuery[LoginInfos]
-  val slickUserLoginInfos = TableQuery[UserLoginInfos]
-  val slickPasswordInfos = TableQuery[PasswordInfos]
-
-  
-  // queries used in multiple places
-  def loginInfoQuery(loginInfo: LoginInfo) = 
-    slickLoginInfos.filter(dbLoginInfo => dbLoginInfo.providerID === loginInfo.providerID && dbLoginInfo.providerKey === loginInfo.providerKey)
 }

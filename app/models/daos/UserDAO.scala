@@ -1,38 +1,23 @@
 package models.daos
 
 import java.util.UUID
+import javax.inject.Inject
 
 import com.mohiva.play.silhouette.api.LoginInfo
+import com.mohiva.play.silhouette.api.services.IdentityService
 import models.User
+import play.api.db.slick.DatabaseConfigProvider
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 import scala.concurrent.Future
 
-/**
- * Give access to the user object.
- */
-trait UserDAO {
+class UserDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) extends IdentityService[User] with DAOSlick {
 
-  /**
-   * Finds a user by its login info.
-   *
-   * @param loginInfo The login info of the user to find.
-   * @return The found user or None if no user for the given login info could be found.
-   */
-  def find(loginInfo: LoginInfo): Future[Option[User]]
+  import driver.api._
 
-  /**
-   * Finds a user by its user ID.
-   *
-   * @param userID The ID of the user to find.
-   * @return The found user or None if no user for the given ID could be found.
-   */
-  def find(userID: UUID): Future[Option[User]]
+  def find(id: UUID): Future[Option[User]] = db.run(users.filter(_.id === id).result.headOption)
 
-  /**
-   * Saves a user.
-   *
-   * @param user The user to save.
-   * @return The saved user.
-   */
-  def save(user: User): Future[User]
+  def retrieve(loginInfo: LoginInfo): Future[Option[User]] = db.run(users.filter(_.email === loginInfo.providerKey).result.headOption)
+
+  def save(user: User): Future[User] = db.run(users.insertOrUpdate(user)).map(_ => user)
 }
